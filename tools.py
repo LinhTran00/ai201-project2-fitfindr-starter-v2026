@@ -79,6 +79,15 @@ def search_listings(
         python -c "from tools import search_listings; print(search_listings('graphic tee', max_price=30))"
     """
     # TODO: replace this with your implementation
+    # 1. Load every listing with load_listings().
+    listings = load_listings()
+    #         2. Filter by max_price and by size, when each is provided.
+    filteredListings = listings.filter(max_price, size)
+    #         3. Score what's left by keyword overlap with `description`.
+    
+    #         4. Drop anything scoring zero.
+    #         5. Sort by score, highest first, and return the listing dicts —
+    #            at most config.SEARCH_RESULT_LIMIT of them.
     return []
 
 
