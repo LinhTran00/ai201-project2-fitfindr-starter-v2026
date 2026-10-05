@@ -24,7 +24,7 @@ data earns credit; *"80% seemed reasonable"* does not.
 Given a query that matches at least one listing, the agent completes all three
 tool calls and returns a fit card — in at least 4 of 5 tries.
 
-**Why this target:**
+**Why this target:** my search is a plain keyword match and some phrasings will miss
 <!-- Why 4 of 5 and not 5 of 5? Something about your search, probably —
      "my search is a plain keyword match and some phrasings will miss" is a
      real answer. -->
@@ -36,9 +36,11 @@ tool calls and returns a fit card — in at least 4 of 5 tries.
 Given a query that matches no listings, the agent stops before calling
 `suggest_outfit` and returns a message naming what to change — 5 of 5 tries.
 
-**Why this target:**
+**Why this target:** This path is decided by a plain if in run_agent, not by a model. When search_listings returns an empty list, the code stops before suggest_outfit, every time. Nothing random happens after the search, so anything less than 5 of 5 would mean the branch is broken.
+
 <!-- Why is 5 of 5 reasonable here when criterion 1 isn't? What's different
      about this path? -->
+
 
 ---
 
@@ -54,9 +56,9 @@ Given a query that matches no listings, the agent stops before calling
      compares session["selected_item"] against what actually reached
      suggest_outfit is the shape you're after. -->
 
+For 5 matching queries, the id of session["selected_item"] is the same as the id of the item passed into suggest_outfit, in 5 of 5 tries.
 
-
-**Why this target:**
+**Why this target:** Passing selected_item from the session into suggest_outfit is plain code with no model involved, so it should be the same item every time. If the ids ever differ, there's a bug in how the loop passes state. It wouldn't crash, though. It would quietly give an outfit for the wrong item, which is why it needs its own check. Anything less than 5 of 5 means the loop is passing state wrong. 
 
 
 
@@ -75,9 +77,9 @@ Given a query that matches no listings, the agent stops before calling
      sentence? A card longer than a caption anyone would post? Any of those can
      be turned into a number. -->
 
+For 5 different matching items, the fit card is 300 characters or fewer in at least 4 of 5 tries.
 
-
-**Why this target:**
+**Why this target:** The fit card is written by a model, so an exact length can't be promised, which is why it's 4 of 5 and not 5 of 5. The tool asks for 2 to 4 sentences, and short caption-style sentences add up to roughly 150–300 characters. Anything longer stops reading like a post and starts reading like a product description.
 
 
 
@@ -92,11 +94,9 @@ Given a query that matches no listings, the agent stops before calling
      search respects a price ceiling — anything, as long as it names a number
      or an observable outcome. -->
 
+When the model can't be reached, the agent returns a message in session["error"] instead of a stack trace, in 5 of 5 tries.
 
-
-**Why this target:**
-
-
+**Why this target:** Parsing, suggesting an outfit, and creating the fit card all call the model, so none of them can work when it's down. The run has to stop, and the only question is how. Catching ModelUnavailable and writing a message into session["error"] is plain code with no model involved, so it should work every time. Anything less than 5 of 5 means the error handling is broken.
 
 ---
 
