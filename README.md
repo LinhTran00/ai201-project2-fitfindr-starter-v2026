@@ -59,24 +59,24 @@
 
 ### `search_listings`
 
-- **What it does:**
-- **Inputs:** <!-- name and type each: `max_price` (float), not "a price" -->
-- **Returns:**
-- **When it has nothing:**
+- **What it does:**  Searches the listings for items matching the user’s description, with optional size and maximum-price filters, and returns matching listings ranked by relevance.
+- **Inputs:** `description` (str), `size` (str | None = None), `max_price` (float | None = none), <!-- name and type each: `max_price` (float), not "a price" -->
+- **Returns:** `filteredListings` (list[dict]) of matching listing dictionaries ordered best match first, each with id, title, description, category, style_tags (list), size, condition, price (float), colors (list), brand (str or None), platform 
+- **When it has nothing:** search_listings returns an empty list 
 
 ### `suggest_outfit`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:** Suggests one or two outfits using items from the user’s wardrobe that go with the new item they want.
+- **Inputs:** `new_items` (dict), `wardrobe` (dict)
+- **Returns:** `suggestions` (str) with outfit suggestions based on the new item and the user’s wardrobe.
+- **When it has nothing:** returns general styling advice for the new item
 
 ### `create_fit_card`
 
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
+- **What it does:**Write a short caption someone would actually post about the find.
+- **Inputs:** `outfit` (str), `new_item` (dict)
+- **Returns:** `caption` (str) with two to four sentences
+- **When it has nothing:** return a descriptive message based on the new item
 
 ---
 
@@ -93,14 +93,14 @@
      The grader checks your code against what you claim here, so the file and
      function have to be real. -->
 
-**Branch rule:**
+**Branch rule:** If search_listings returns an empty list, put a message in the session and stop. Otherwise take the first result and go to suggest_outfit.
 
 **Where it lives:** `agent.py::run_agent`
 
-**How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
+**How the query is parsed:** asking the model to pull the filtered information out which is a description, a size and a max price.
 
-**What moves through the session:** <!-- which fields, in what order -->
-
+**What moves through the session:** query -> parsed -> search_results -> selected_item -> outfit_suggestion -> fit_card
+error is only set if search_results is empty.
 ---
 
 ## Sample Run
