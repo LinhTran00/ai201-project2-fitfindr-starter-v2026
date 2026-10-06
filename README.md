@@ -113,26 +113,45 @@ error is only set if search_results is empty.
 **One full query**
 
 ```
-$ python app.py ask '...'
-
+$ python app.py ask 'vintage graphic tee under $30, size M'
 ```
+***Output***
+
+  Found:    Y2K Baby Tee — Butterfly Print — $18.0 on depop
+
+  Outfit:   **Outfit 1: Casual Streetwear**
+Pair the baby tee with your baggy straight-leg jeans, dark wash. Layer your black cropped zip hoodie on top, and slip into your chunky white sneakers. Finish with your black crossbody bag for an easy, everyday look.
+
+**Outfit 2: Y2K Contrast**
+Tuck the butterfly tee into your wide-leg khaki trousers, cinched with your brown leather belt. Throw on your vintage black denim jacket and lace up your black combat boots to balance the sweet, girly print with some edge.
+
+  Fit card: Found the ultimate Y2K butterfly baby tee and I’m obsessed. Snagged this baby on Depop for just $18 and it’s giving major sweet-meets-edgy energy. How are we styling this—casual streetwear with baggy denim or leaning into the contrast with combat boots?🦋✨
 
 **The three tools, tested one at a time**
 
 ```
 $ python -c "from tools import search_listings; print(search_listings('graphic tee', max_price=30))"
+```
+***Output***
+
+le vintage graphic on the chest. Cozy interior. Some pilling but adds to the worn-in look.', 'category': 'tops', 'style_tags': ['vintage', 'grunge', 'graphic', 'streetwear'], 'size': 'L', 'condition': 'fair', 'price': 26.0, 'colors': ['black', 'charcoal'], 'brand':None, 'platform': 'depop'}]
 
 ```
-
-```
-$ python -c "from tools import suggest_outfit; ..."
-
+$ python -c "from tools import suggest_outfit; from utils.data_loader import get_example_wardrobe, load_listings; print(suggest_outfit(load_listings()[0], get_example_wardrobe()))"
 ```
 
-```
-$ python -c "from tools import create_fit_card; ..."
+***Output***
+
+**Outfit 2: Edgy Streetwear**
+Wear the jeans with the black cropped zip hoodie and layer the vintage black denim jacket on top. Lace up your black combat boots, put on the brown leather belt, and grab your black crossbody bag for a cool, all-black-and-denim vibe.
 
 ```
+$ python -c "from tools import create_fit_card; from utils.data_loader import load_listings; print(create_fit_card('jeans and white sneakers', load_listings()[0]))"
+```
+
+***Output***
+
+Nothing beats a broken-in pair of vintage Levi's 501 jeans. Snagged these for just $38.00 on depop. Paired with crisp white sneakers, the streetwear vibe is effortless.
 
 ---
 
