@@ -227,7 +227,7 @@ def _show(session: dict) -> None:
 
     item = session["selected_item"] or {}
     print(f"  found:    {item.get('title')} — ${item.get('price')} on {item.get('platform')}")
-    print(f"  outfit:   {session['outfit_suggestion']}")
+    print(f"  outfit:   \n{session['outfit_suggestion']}")
     print(f"  fit card: {session['fit_card']}")
 
 
@@ -247,6 +247,5 @@ if __name__ == "__main__":
     ))
 
     print(
-        "\nThe second one should stop before the fit card. If both paths look "
-        "the same,\nthe branch isn't doing anything yet."
+        "\nThe second one should stop before the fit card. If both paths look the same,\nthe branch isn't doing anything yet."
     )

@@ -41,6 +41,7 @@
 
 <!-- Three or four sentences: what a user asks for, and what they get back. -->
 
+FitFindr helps you shop secondhand. You describe what you want in plain words, like "vintage graphic tee under $30, size M", and it searches thrift listings from Depop, thredUp, and Poshmark for the best match. It then suggests one or two outfits that pair the find with clothes you already own, or gives general styling ideas if your wardrobe is empty, and writes a short caption you could post about it. If nothing matches, it stops and tells you what to change, like your keywords, size, or max price.
 
 
 ---
@@ -93,7 +94,7 @@
      The grader checks your code against what you claim here, so the file and
      function have to be real. -->
 
-**Branch rule:** If search_listings returns an empty list, put a message in the session and stop. Otherwise take the first result and go to suggest_outfit.
+**Branch rule:** If search_listings returns an empty list, put a message in session["error"] that says what the user could change (keywords, size, or max price), and return the session without calling suggest_outfit. Otherwise, take the first result as session["selected_item"] and go to suggest_outfit.
 
 **Where it lives:** `agent.py::run_agent`
 
@@ -166,15 +167,20 @@ Nothing beats a broken-in pair of vintage Levi's 501 jeans. Snagged these for ju
 
 **Moment 1**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for:* Here are five acceptance criteria (paste in the five criterias) for a multi-tool agent. For each one, tell me exactly how you would test it using only what the sentence says. Don't suggest improvements — just tell me what you'd do
+- *What came back:* A step-by-step test for each criterion: which query to use, how many runs, what to record, and when it passes. It also flagged places where my wording was unclear:
+     - Criterion 1 says "a query," singular, so it would repeat one query 5 times instead of using 5 different ones.
+     - Criterion 2's "names what the user could change" can only be checked by reading the message and making a judgment call.
+     - Criterion 3 should take the item from what suggest_outfit actually received, not read it back from the session, or the check proves nothing.
+     - Criterion 4's "why" mentions 2–4 sentences, but the criterion only sets a character limit, so it would only count characters.
+     - Criterion 5 doesn't say which query to use, so any query would count.
+- *What I changed:* didn't change anything in my criteria, because each test the AI described matched what I meant, and every criterion could be checked as written. The points it flagged were things I had already decided: repeating one query is fine for criterion 1, reading the message is a fair way to judge criterion 2, and characters are the only thing criterion 4 measures. The one thing I took from it was criterion 3: I'll check the item suggest_outfit actually received instead of reading it back from the session.
 
 **Moment 2**
 
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+- *What I asked for*: I asked whether my criterion 5 was valid. It said: "For 5 out of 5 queries, if the model can't be reached, parsing will still occur and information still gets retrieved."
+- *What came back*: It said the criterion wasn't valid yet, for three reasons. First, my README says I parse the query by asking the model, so parsing can't happen when the model is down. Second, "information still gets retrieved" is too vague to check. Third, suggest_outfit and create_fit_card also need the model, so the run can't finish anyway. It gave me two fixes: (A) check that the agent returns a friendly message in session["error"] instead of a stack trace, or (B) build a regex backup parser and check that it still fills in size and max price.
+- *What I changed*: I chose option A and rewrote the criterion: "When the model can't be reached, the agent returns a message in session["error"] instead of a stack trace, in 5 of 5 tries." It kept my original idea of testing what happens when the model is down, but now it describes something my agent can actually do and something I can check. I skipped option B because building a second parser just for this test was more work than the criterion needed.
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
