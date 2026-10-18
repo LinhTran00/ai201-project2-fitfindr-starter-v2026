@@ -20,6 +20,7 @@ import trace
 from tools import search_listings, suggest_outfit, create_fit_card
 from generate import generate, ModelUnavailable
 from mcp_client import call_tool
+from trace import step, start_trace, get_trace
 
 
 # ── session state ─────────────────────────────────────────────────────────────
@@ -123,10 +124,15 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     #          chose in your README. Put the result in session["parsed"].
     count += 1
     trace.check_iterations(count)
-    session["parsed"] = parse_query(session["query"])
+    try:
+        session["parsed"] = parse_query(session["query"])
+    except ModelUnavailable as exc:
+        session["error"] = _model_down_message(exc)
+        return session
 
     #       4. Call search_listings() with what you parsed.
     #          Put the results in session["search_results"].
+    start_trace()
     count += 1
     trace.check_iterations(count)
     parsed = session["parsed"]
@@ -135,6 +141,9 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         "size": parsed["size"],
         "max_price": parsed["max_price"],
     })
+    step("search_listings", inputs={"description": parsed["description"], "max_price": parsed["max_price"], "size": parsed["size"]},
+             returned=session["search_results"])
+   
     # session["search_results"] = search_listings(
     #     parsed["description"], parsed["size"], parsed["max_price"]
     # )
@@ -156,17 +165,25 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     #          Put the result in session["outfit_suggestion"].
     count += 1
     trace.check_iterations(count)
-    session["outfit_suggestion"] = suggest_outfit(
-        session["selected_item"], session["wardrobe"]
-    )
+    try:
+        session["outfit_suggestion"] = suggest_outfit(
+            session["selected_item"], session["wardrobe"]
+        )
+    except ModelUnavailable as exc:
+        session["error"] = _model_down_message(exc)
+        return session
 
     #       7. Call create_fit_card() with the outfit and the item.
     #          Put the result in session["fit_card"].
     count += 1
     trace.check_iterations(count)
-    session["fit_card"] = create_fit_card(
-        session["outfit_suggestion"], session["selected_item"]
-    )
+    try:
+        session["fit_card"] = create_fit_card(
+            session["outfit_suggestion"], session["selected_item"]
+        )
+    except ModelUnavailable as exc:
+        session["error"] = _model_down_message(exc)
+        return session
 
     #       8. Return the session.
     return session
@@ -221,6 +238,14 @@ def _no_results_message(parsed: dict) -> str:
     if len(tips) > 1:
         tips[-1] = "or " + tips[-1]
     return f"Nothing matched {searched}. Try to {', '.join(tips)}."
+
+
+def _model_down_message(exc: Exception) -> str:
+    """Say the model couldn't be reached, plus the reason generate() gave."""
+    return (
+        "The model couldn't be reached, so I couldn't finish your request. "
+        f"Check your API key in .env and your internet connection.\nDetails: {exc}"
+    )
 
 
 # ── running it directly ───────────────────────────────────────────────────────

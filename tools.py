@@ -183,7 +183,13 @@ def suggest_outfit(new_item: dict, wardrobe: dict) -> str:
             "two outfits built around this item, describing the kinds of pieces "
             "that would go with it. Keep it under 120 words."
         )
-        return generate(prompt, system=_STYLIST)
+        # Say up front that the wardrobe is empty, so the user knows why the
+        # advice is general instead of naming pieces they own.
+        return (
+            "Your wardrobe is empty, so I can't match this with pieces you own.\n\n"
+            "Here is some general styling advice:\n\n"
+            + generate(prompt, system=_STYLIST)
+        )
 
     # 3. If it isn't, format the wardrobe items into the prompt and ask for
     #    specific combinations naming pieces the user already owns.
