@@ -132,7 +132,7 @@ def run_agent(query: str, wardrobe: dict) -> dict:
 
     #       4. Call search_listings() with what you parsed.
     #          Put the results in session["search_results"].
-    start_trace()
+    # start_trace()
     count += 1
     trace.check_iterations(count)
     parsed = session["parsed"]
@@ -141,8 +141,8 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         "size": parsed["size"],
         "max_price": parsed["max_price"],
     })
-    step("search_listings", inputs={"description": parsed["description"], "max_price": parsed["max_price"], "size": parsed["size"]},
-             returned=session["search_results"])
+    # step("search_listings", inputs={"description": parsed["description"], "max_price": parsed["max_price"], "size": parsed["size"]},
+    #          returned=session["search_results"])
    
     # session["search_results"] = search_listings(
     #     parsed["description"], parsed["size"], parsed["max_price"]

@@ -202,17 +202,119 @@ Nothing beats a broken-in pair of vintage Levi's 501 jeans. Snagged these for ju
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. matching query completes | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. impossible query stops early | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. selected item reaches suggest_outfit | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. fit card stays under 300 characters | 4 of 5 | PASS (graphic tee, 248) | PASS (denim jacket, 267) | PASS (flannel shirt, 195) | PASS (slip dress, 228) | PASS (chelsea boots, 257) | MET (5/5) |
+| 5. model down returns error message | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET(5/5) |
 
-**Real output from one try**, pasted as text, naming the file and function
-that produced it:
+
+- **Criterion 3:** the run log prints `selected_item` but not the item that
+  `suggest_outfit` received. I marked PASS because in every try the selected
+  item was *Denim Jacket — Light Wash, Cropped ($42.0, poshmark)* and every
+  outfit suggestion styles that same light-wash cropped denim jacket. It is
+  not a direct id comparison.
+
+
+**Real output from one try per criterion**, pasted as text. Every run was
+recorded by `run_eval.py::main`, which calls `agent.py::run_agent`. Criteria
+1–4 come from `results/run_2026-10-18_1745_before.md`; criterion 5 comes from
+`results/run_2026-10-18_1751_before.md` (run with one character of the API
+key changed).
+
+**Criterion 1 — matching query completes** (try 1). Search by
+`mcp_server.py::search_listings` (via `mcp_client.py::call_tool`), outfit by
+`tools.py::suggest_outfit`, fit card by `tools.py::create_fit_card`:
 
 ```
+### matching query completes
+- Query: `vintage graphic tee under $30`
+- Wardrobe: example
 
+**Try 1**
+- stopped early: no
+- selected_item: Y2K Baby Tee — Butterfly Print ($18.0, depop)
+- search_results: 10
+
+Outfit suggestion:
+**Outfit 1: Casual Y2K Streetwear**
+Pair the baby tee with your baggy straight-leg jeans, dark wash. Layer the black cropped zip hoodie right over top, and step into your chunky white sneakers. Finish the whole look with your black crossbody bag.
+
+**Outfit 2: Soft Retro Contrast**
+Tuck the butterfly tee into your wide-leg khaki trousers, and cinch the waist using your brown leather belt. Throw on your vintage black denim jacket as an extra layer, and tie the outfit together with your black combat boots.
+
+Fit card:
+Butterfly print Y2K baby tee for only $18? Grabbed this on Depop and I'm obsessed. Giving major early 2000s streetwear energy with baggy denim, or leaning into that soft retro contrast with khaki trousers. ✨
+```
+
+**Criterion 2 — impossible query stops early** (try 1). The stop happens in
+`agent.py::run_agent`'s empty-results branch; the message is written by
+`agent.py::_no_results_message`:
+
+```
+### impossible query stops early
+- Query: `designer ballgown size XXS under $5`
+- Wardrobe: example
+
+**Try 1**
+- stopped early: yes — Nothing matched 'designer ballgown' in size XXS under $5. Try to use different keywords, pick another size, or raise your max price.
+- selected_item: (none)
+- search_results: 0
+```
+
+**Criterion 3 — selected item reaches suggest_outfit** (try 1).
+`selected_item` is set in `agent.py::run_agent` and passed to
+`tools.py::suggest_outfit`, which wrote the outfit below:
+
+```
+### selected item reaches suggested outfit
+- Query: `denim jacket under $50`
+- Wardrobe: example
+
+**Try 1**
+- stopped early: no
+- selected_item: Denim Jacket — Light Wash, Cropped ($42.0, poshmark)
+- search_results: 7
+
+Outfit suggestion:
+**Outfit 1: Double Denim**
+Pair the Denim Jacket with your white ribbed tank top and baggy straight-leg jeans. Finish with chunky white sneakers and your black crossbody bag for an easy, casual weekend look.
+
+**Outfit 2: High-Low Contrast**
+Layer the Denim Jacket over your black cropped zip hoodie, and wear them with your wide-leg khaki trousers. Add your black combat boots and the black crossbody bag to give the classic jacket a cool, streetwear edge.
+```
+
+**Criterion 4 — fit card stays under 300 characters** (graphic tee, try 1).
+Written by `tools.py::create_fit_card`:
+
+```
+### fit card length: graphic tee
+- Query: `vintage graphic tee under $30`
+- Wardrobe: example
+
+**Try 1**
+- stopped early: no
+- selected_item: Y2K Baby Tee — Butterfly Print ($18.0, depop)
+- search_results: 10
+
+Fit card:
+Got this absolute dream of a Y2K butterfly baby tee for just $18 on Depop. Perfect for channeling total 2000s pop-princess energy with baggy jeans or balancing it out with chunky combat boots. Grab it before I change my mind and keep it forever! 🦋✨
+```
+
+**Criterion 5 — model down returns error message** (try 1, bad API key).
+`generate.py::generate` raised `ModelUnavailable`, `agent.py::run_agent`
+caught it, and `agent.py::_model_down_message` wrote the message:
+
+```
+### model down returns error message
+- Query: `denim jacket under $50`
+- Wardrobe: example
+
+**Try 1**
+- stopped early: yes — The model couldn't be reached, so I couldn't finish your request. Check your API key in .env and your internet connection.
+Details: The model rejected your API key. Check GEMINI_API_KEY in your .env file, or create a fresh key at aistudio.google.com.
+- selected_item: (none)
+- search_results: 0
 ```
 
 ---

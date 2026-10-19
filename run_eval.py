@@ -68,6 +68,8 @@ def main():
     parser.add_argument("--tries", "--trials", type=int, default=5, dest="tries",
                         help="tries per scenario (default 5, matching your criteria)")
     parser.add_argument("--label", default="", help="a name for this run, e.g. 'before'")
+    parser.add_argument("--criterion", type=int, default=None,
+                        help="only run the scenarios for this criterion number")
     args = parser.parse_args()
 
     problems = scenario_module.validate()
@@ -88,8 +90,16 @@ def main():
     config.CACHE_ENABLED = False
     print("Cache is OFF for this run — that's deliberate.\n")
 
+    # Run every scenario, or only the ones for the criterion asked for.
+    scenarios = scenario_module.SCENARIOS
+    if args.criterion is not None:
+        scenarios = [s for s in scenarios if s.get("criterion") == args.criterion]
+        if not scenarios:
+            print(f"No scenarios have criterion {args.criterion}.", file=sys.stderr)
+            sys.exit(1)
+
     rows = []
-    for scenario in scenario_module.SCENARIOS:
+    for scenario in scenarios:
         print(f"{scenario['name']}  ({scenario['wardrobe']} wardrobe)")
         print(f"  query: {scenario['query']}")
 

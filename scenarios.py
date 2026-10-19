@@ -35,6 +35,48 @@ SCENARIOS = [
         "wardrobe": "empty",
         "criterion": None,
     },
+    {
+        "name": "selected item reaches suggested outfit",
+        "query":"denim jacket under $50",
+        "wardrobe":"example",
+        "criterion": 3,
+    },
+    {
+        "name": "fit card length: graphic tee",
+        "query": "vintage graphic tee under $30",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        "name": "fit card length: denim jacket",
+        "query": "denim jacket under $50",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        "name": "fit card length: flannel shirt",
+        "query": "plaid flannel shirt under $30",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        "name": "fit card length: slip dress",
+        "query": "silk slip dress under $40",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        "name": "fit card length: chelsea boots",
+        "query": "chelsea boots under $50",
+        "wardrobe": "example",
+        "criterion": 4,
+    },
+    {
+        "name": "model down returns error message",
+        "query":"denim jacket under $50",
+        "wardrobe":"example",
+        "criterion": 5,
+    }
     # TODO: add what your criteria 3, 4 and 5 need.
     #
     # Set "criterion" to the number in criteria.md that the scenario tests.
@@ -47,6 +89,7 @@ SCENARIOS = [
     # For a fit-card criterion, you probably want the SAME query listed more
     # than once, or several different items, depending on what your criterion
     # actually says.
+
 ]
 
 WARDROBES = ("example", "empty")
