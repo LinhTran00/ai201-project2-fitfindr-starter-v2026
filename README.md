@@ -182,6 +182,12 @@ Nothing beats a broken-in pair of vintage Levi's 501 jeans. Snagged these for ju
 - *What came back*: It said the criterion wasn't valid yet, for three reasons. First, my README says I parse the query by asking the model, so parsing can't happen when the model is down. Second, "information still gets retrieved" is too vague to check. Third, suggest_outfit and create_fit_card also need the model, so the run can't finish anyway. It gave me two fixes: (A) check that the agent returns a friendly message in session["error"] instead of a stack trace, or (B) build a regex backup parser and check that it still fills in size and max price.
 - *What I changed*: I chose option A and rewrote the criterion: "When the model can't be reached, the agent returns a message in session["error"] instead of a stack trace, in 5 of 5 tries." It kept my original idea of testing what happens when the model is down, but now it describes something my agent can actually do and something I can check. I skipped option B because building a second parser just for this test was more work than the criterion needed.
 
+**Moment 3**
+
+- *What I asked for*: After my bad-key run, I saw that every scenario stopped at parsing, even the impossible query, which never reached my "Nothing matched" branch. I asked the AI to help me add a second branch so the agent doesn't depend on the model for the search.
+- *What came back*: Its first suggestion was to catch `ModelUnavailable` in the parse step and search with the whole query as the description, with no size or price. It pointed out the downside itself: without the model, the search would lose its size and price filters.
+- *What I changed*: I said we could parse with regex instead, which was option B from Moment 2. The AI wrote `_parse_query_regex`, which pulls out the size (`size XXS`) and price (`under $5`) and uses the leftover words as the description. Two things went wrong when I added it. First, I got `re is not defined`, because the code used Python's `re` module and `agent.py` never imported it. Second, the parse step still used the first version, so `_parse_query_regex` was never called. After adding `import re` and connecting the function, I tested it with a bad key. The impossible query now shows "Nothing matched 'designer ballgown' in size XXS under $5…" instead of the model error. One weak spot I noticed: filler words like "looking for a" stay in the description.
+
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 
      Don't fill these in during unit 3.
