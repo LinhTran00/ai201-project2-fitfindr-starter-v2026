@@ -14,6 +14,7 @@ Build and test your three tools in `tools.py` first. Then come here.
 """
 
 import json
+import re
 
 import config
 import trace
@@ -124,15 +125,20 @@ def run_agent(query: str, wardrobe: dict) -> dict:
     #          chose in your README. Put the result in session["parsed"].
     count += 1
     trace.check_iterations(count)
+    # try:
+    #     session["parsed"] = parse_query(session["query"])
+    # except ModelUnavailable as exc:
+    #     session["error"] = _model_down_message(exc)
+    #     return session
     try:
         session["parsed"] = parse_query(session["query"])
-    except ModelUnavailable as exc:
-        session["error"] = _model_down_message(exc)
-        return session
+    except ModelUnavailable:
+        # The search doesn't need the model, so parse with regex and keep going.
+        session["parsed"] = _parse_query_regex(session["query"])
 
     #       4. Call search_listings() with what you parsed.
     #          Put the results in session["search_results"].
-    # start_trace()
+    start_trace()
     count += 1
     trace.check_iterations(count)
     parsed = session["parsed"]
@@ -141,8 +147,8 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         "size": parsed["size"],
         "max_price": parsed["max_price"],
     })
-    # step("search_listings", inputs={"description": parsed["description"], "max_price": parsed["max_price"], "size": parsed["size"]},
-    #          returned=session["search_results"])
+    step("search_listings", inputs={"description": parsed["description"], "max_price": parsed["max_price"], "size": parsed["size"]},
+             returned=session["search_results"])
    
     # session["search_results"] = search_listings(
     #     parsed["description"], parsed["size"], parsed["max_price"]
@@ -224,6 +230,23 @@ def parse_query(query: str) -> dict:
     except (ValueError, TypeError):
         return {"description": query, "size": None, "max_price": None}
 
+def _parse_query_regex(query: str) -> dict:
+    """Pull size and max_price out with regex. Used when the model is down."""
+    price = re.search(r"(?:under|below|less than|max)?\s*\$(\d+(?:\.\d+)?)", query, re.I)
+    size = re.search(r"\bsize\s+([A-Za-z0-9]+)", query, re.I)
+
+    # Whatever is left after removing price and size is the description.
+    description = query
+    for match in (price, size):
+        if match:
+            description = description.replace(match.group(0), " ")
+    description = re.sub(r"[,\s]+", " ", description).strip()
+
+    return {
+        "description": description or query,
+        "size": size.group(1).upper() if size else None,
+        "max_price": float(price.group(1)) if price else None,
+    }
 
 def _no_results_message(parsed: dict) -> str:
     """Say what was searched for and what the user could change."""
